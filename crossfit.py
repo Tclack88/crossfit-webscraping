@@ -1,20 +1,27 @@
 #!/usr/bin/env python3
+
+# NOTE: Run with 'crossfit.py | tee output_file.txt'
+# To use this personally, change hard code of variables:
+# browser (the location saved)
+# user_name
+# start, end  (the dates being scoured)
+
+import os
+import sys
 import time
+import datetime
 import selenium
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
-from multiprocessing import Process
 from bs4 import BeautifulSoup
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import NoSuchElementException, TimeoutException
 
-monthDict={'01':'Jan', '02':'Feb', '03':'Mar', '04':'Apr', '05':'May', '06':'Jun', '07':'Jul', '08':'Aug', '09':'Sep', '10':'Oct', '11':'Nov', '12':'Dec'}
-
-
 browser = webdriver.Chrome('/home/tclack/bin/chromedriver')
-urlstart = "https://www.crossfit.com/workout/2009/03/"
+# YMMV this is the chromedriver I use and the location
+urlstart = "https://www.crossfit.com/workout/"
 urlend = "#/comments"
 
 
@@ -35,14 +42,10 @@ def Parse(innerHTML):
     soup = BeautifulSoup(innerHTML,"html.parser")
 
     #### Get Date #####
-    date = soup.find("h1").text
-    date = date.split(' ')
-    datestring = '20'+date[1]
-    year = datestring[0:4]
-    month = datestring[4:6]
-    month = monthDict[month]
-    day = datestring[6:]
-    print(':::::',day,month,year,':::::')
+  
+    print(':::::',current.strftime('%Y%b%d'),':::::')
+    write_date = '::::: '+current.strftime('%Y%b%d')+' :::::'
+    #os.system("echo -e "+write_date+" >> "+output_file)
 
     ##### Get WOD description #####
     WOD = soup.find("div",{"class":'content'})
@@ -55,7 +58,11 @@ def Parse(innerHTML):
         # each WOD is always like: 'Post time to comments', so I don't want that or
         # any of the links or junk that follows"
         else:
-            print(WODdescription[i].text)
+            print(line)
+            write_WOD = line
+            #os.system("echo -e "+write_WOD+" >> "+output_file)
+
+
     print("\n")
 
     #### My Post ####
@@ -63,15 +70,23 @@ def Parse(innerHTML):
     users = soup.find_all("div",{"class":"name"})
     posts = soup.find_all("div",{"class":"text"})
     index = 0
+    user_name = "clack_attack"
     for user in users:
-        if "clack_attack" in user.text.lower(): 
+        if user_name in user.text.lower(): 
             print(user.text)
             # My username changes and I don't always capitalize
+            # Strong assumption: 
+            # there are as many <div class=name> tags as <div class = text>
+            # This seems to be the case so my text matches up... perhaps this should
+            # be made more general/exact
             print(posts[index].text)
+            write_post = posts[index].text
+            #os.system("echo -e "+write_post+"\n\n\n\n\n >> "+output_file)
         index += 1
     print('\n'*5)
 
 
+    
 def Collect():
     browser.get(url)
     #wait = WebDriverWait(browser,10)
@@ -84,13 +99,24 @@ def Collect():
         #print('user present in',url)
         Parse(innerHTML)
     else:
-        print('nahbro')
+        #print('nahbro')
+        print()
+    sys.stdout.flush()
+    # flush allows displaying stdout to terminal AND writing to the output file
+    # otherwise we'd have to wait until the script finishes to see the output file
+    # It's psychologically nicer when we see an actual output
 
-
-
-
-for i in range(1,31):
-    urlmiddle = str(i).zfill(2)
+#output_file = str(datetime.datetime.now().strftime('%d%b%Y-%H:%m:%S'))+".txt"
+#os.system("touch "+output_file)
+# want to make the file from python to generate new file each time
+# consider the above a work in progress then
+begin = datetime.date(2009,3,1)
+end = datetime.date(2009,3,31)
+# these dates may be changed at a whim
+current = begin
+for i in range((end-begin).days):
+    current += datetime.timedelta(days=1)
+    urlmiddle = current.strftime('%Y/%m/%d')
     url = urlstart+urlmiddle+urlend
     Collect()
 
