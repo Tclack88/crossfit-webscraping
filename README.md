@@ -2,7 +2,7 @@
 
 ![Crossfit project logo](https://github.com/Tclack88/blog/blob/gh-pages/assets/crossfit/small_xfit_logo.png?raw=true)
 
-I created this to automate finding my old workout posts on [crossfit](www.crossfit.com)'s webpage. You can read about the insights gained and other relevant background information on [my blog entry](https://tclack88.github.io/blog/code/2019/06/22/crossfit.html) for the code as well as view a realtime gif demonstration of it running. This should run independent of the Linux distro used.
+I created this to automate finding my old workout posts on [crossfit](https://www.crossfit.com)'s webpage. You can read about the insights gained and other relevant background information on [my blog entry](https://tclack88.github.io/blog/code/2019/06/22/crossfit.html) for the code as well as view a realtime gif demonstration of it running. This should run independent of the Linux distro used.
 
 Non-standard library needed:
 
